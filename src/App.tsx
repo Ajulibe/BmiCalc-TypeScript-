@@ -40,6 +40,7 @@ import "./theme/variables.css";
 const App: React.FC = () => {
   const [result, setResult] = useState<number>();
   const [error, setError] = useState<string>();
+  const [calcUnits, setCalcUnits] = useState<"mkg" | "ftlbs">("mkg");
 
   //this is because we are using typescript.
   //with javascript you dont need the <HTML...>after Ref
@@ -62,8 +63,13 @@ const App: React.FC = () => {
       setError("Please enter a valid (non-negatve) input number");
       return;
     }
+    const weightConversionFactor = calcUnits === "ftlbs" ? 2.2 : 1;
+    const heightConversionFactor = calcUnits === "ftlbs" ? 3.28 : 1;
+
+    const weight = +enteredWeight / weightConversionFactor;
+    const height = +enteredHeight / heightConversionFactor;
     // the + just means that anything that is returned from there is of type number
-    const bmi = +enteredWeight / (+enteredHeight * +enteredHeight);
+    const bmi = weight / (height * height);
 
     setResult(bmi);
   };
@@ -75,6 +81,10 @@ const App: React.FC = () => {
 
   const clearError = () => {
     setError("");
+  };
+
+  const selectCalcUnitHandler = (selectedValue: "mkg" | "ftlbs") => {
+    setCalcUnits(selectedValue);
   };
 
   return (
@@ -102,13 +112,18 @@ const App: React.FC = () => {
           <IonGrid>
             <IonRow>
               <IonCol>
-                <InputControl selectedValue="mkg" />
+                <InputControl
+                  selectedValue={calcUnits}
+                  onSelectValue={selectCalcUnitHandler}
+                />
               </IonCol>
             </IonRow>
             <IonRow>
               <IonCol>
                 <IonItem>
-                  <IonLabel position="floating">Your Height</IonLabel>
+                  <IonLabel position="floating">
+                    Your Height ({calcUnits === "mkg" ? "meters" : "feet"})
+                  </IonLabel>
                   <IonInput type="number" ref={heightInputRef}></IonInput>
                 </IonItem>
               </IonCol>
@@ -116,7 +131,9 @@ const App: React.FC = () => {
             <IonRow>
               <IonCol>
                 <IonItem>
-                  <IonLabel position="floating">Your Weight</IonLabel>
+                  <IonLabel position="floating">
+                    Your Weight ({calcUnits === "mkg" ? "kg" : "lbs"})
+                  </IonLabel>
                   <IonInput type="number" ref={weightInputRef}></IonInput>
                 </IonItem>
               </IonCol>
